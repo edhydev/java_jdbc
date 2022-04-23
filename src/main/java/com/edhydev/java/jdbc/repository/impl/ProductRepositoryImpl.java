@@ -1,5 +1,6 @@
 package com.edhydev.java.jdbc.repository.impl;
 
+import com.edhydev.java.jdbc.models.Category;
 import com.edhydev.java.jdbc.models.Product;
 import com.edhydev.java.jdbc.repository.Repository;
 import com.edhydev.java.jdbc.utils.ConexionBaseDatos;
@@ -17,7 +18,9 @@ public class ProductRepositoryImpl implements Repository<Product> {
     @Override
     public List<Product> findAll() {
         List<Product> products = new ArrayList<>();
-        String SQL = "SELECT * FROM product";
+        String SQL = "SELECT p.id, p.name, p.price, p.register_date, p.category_id, c.name as category " +
+                "FROM product p " +
+                "INNER JOIN category c ON p.category_id = c.id";
         try (Statement statement = getConnection().createStatement(); ResultSet resultSet = statement.executeQuery(SQL)) {
             while (resultSet.next()) {
                 Product p = getProduct(resultSet);
@@ -35,13 +38,19 @@ public class ProductRepositoryImpl implements Repository<Product> {
         p.setName(resultSet.getString("name"));
         p.setPrice(resultSet.getDouble("price"));
         p.setRegisterDate(resultSet.getDate("register_date"));
+        p.setCategory(new Category());
+        p.getCategory().setId(resultSet.getLong("category_id"));
+        p.getCategory().setName(resultSet.getString("category"));
         return p;
     }
 
     @Override
     public Product findById(Long id) {
         Product product = null;
-        String SQL = "SELECT * FROM product WHERE id = ?";
+        String SQL = "SELECT p.id, p.name, p.price, p.register_date, p.category_id, c.name as category " +
+                "FROM product p " +
+                "INNER JOIN category c ON p.category_id = c.id " +
+                "WHERE p.id = ?";
         try (PreparedStatement statement = getConnection().prepareStatement(SQL);) {
             statement.setLong(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -59,17 +68,19 @@ public class ProductRepositoryImpl implements Repository<Product> {
     public void save(Product product) {
         String SQL;
         if (product.getId() != null && product.getId() > 0) {
-            SQL = "UPDATE product SET name = ?, price = ? WHERE id = ?";
+            SQL = "UPDATE product SET name = ?, price = ?, category_id = ? WHERE id = ?";
         } else {
-            SQL = "INSERT INTO product SET name = ?, price = ?, register_date = ?";
+            SQL = "INSERT INTO product SET name = ?, price = ?, category_id = ?, register_date = ?";
         }
         try (PreparedStatement stmt = getConnection().prepareStatement(SQL)) {
             stmt.setString(1, product.getName());
             stmt.setDouble(2, product.getPrice());
+            stmt.setLong(3, product.getCategory().getId());
+
             if (product.getId() != null && product.getId() > 0) {
-                stmt.setLong(3, product.getId());
+                stmt.setLong(4, product.getId());
             } else {
-                stmt.setDate(3, new Date(product.getRegisterDate().getTime()));
+                stmt.setDate(4, new Date(product.getRegisterDate().getTime()));
             }
             stmt.executeUpdate();
         } catch (SQLException e) {

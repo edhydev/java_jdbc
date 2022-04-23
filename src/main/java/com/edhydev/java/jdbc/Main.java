@@ -1,5 +1,6 @@
 package com.edhydev.java.jdbc;
 
+import com.edhydev.java.jdbc.models.Category;
 import com.edhydev.java.jdbc.models.Product;
 import com.edhydev.java.jdbc.repository.Repository;
 import com.edhydev.java.jdbc.repository.impl.ProductRepositoryImpl;
@@ -23,7 +24,11 @@ public class Main {
             System.out.println();
 
             System.out.println("========== SAVE - CREAR ==========");
-            repository.save(new Product("coca cola 3L", 33.5, new Date()));
+            Product save = new Product("coca cola 600ml", 16.5, new Date());
+            Category category = new Category();
+            category.setId(1L);
+            save.setCategory(category);
+            repository.save(save);
             System.out.println();
 
             System.out.println("========== SAVE - ACTUALIZAR ==========");

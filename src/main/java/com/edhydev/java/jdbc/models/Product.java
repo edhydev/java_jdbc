@@ -7,6 +7,7 @@ public class Product {
     private String name;
     private Double price;
     private Date registerDate;
+    private Category category;
 
     public Product() {
     }
@@ -49,6 +50,14 @@ public class Product {
         this.registerDate = registerDate;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
     @Override
     public String toString() {
         return "Product{" +
@@ -56,6 +65,7 @@ public class Product {
                 ", name='" + name + '\'' +
                 ", price=" + price +
                 ", registerDate=" + registerDate +
+                ", category=" + category +
                 '}';
     }
 }
