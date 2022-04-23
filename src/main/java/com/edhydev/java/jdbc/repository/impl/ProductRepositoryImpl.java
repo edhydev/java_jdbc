@@ -4,10 +4,7 @@ import com.edhydev.java.jdbc.models.Product;
 import com.edhydev.java.jdbc.repository.Repository;
 import com.edhydev.java.jdbc.utils.ConexionBaseDatos;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,11 +20,7 @@ public class ProductRepositoryImpl implements Repository<Product> {
         String SQL = "SELECT * FROM product";
         try (Statement statement = getConnection().createStatement(); ResultSet resultSet = statement.executeQuery(SQL)) {
             while (resultSet.next()) {
-                Product p = new Product();
-                p.setId(resultSet.getLong("id"));
-                p.setName(resultSet.getString("name"));
-                p.setPrice(resultSet.getDouble("price"));
-                p.setRegisterDate(resultSet.getDate("register_date"));
+                Product p = getProduct(resultSet);
                 products.add(p);
             }
         } catch (SQLException e) {
@@ -36,9 +29,30 @@ public class ProductRepositoryImpl implements Repository<Product> {
         return products;
     }
 
+    private Product getProduct(ResultSet resultSet) throws SQLException {
+        Product p = new Product();
+        p.setId(resultSet.getLong("id"));
+        p.setName(resultSet.getString("name"));
+        p.setPrice(resultSet.getDouble("price"));
+        p.setRegisterDate(resultSet.getDate("register_date"));
+        return p;
+    }
+
     @Override
     public Product findById(Long id) {
-        return null;
+        Product product = null;
+        String SQL = "SELECT * FROM product WHERE id = ?";
+        try (PreparedStatement statement = getConnection().prepareStatement(SQL);) {
+            statement.setLong(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                product = getProduct(resultSet);
+            }
+            resultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return product;
     }
 
     @Override

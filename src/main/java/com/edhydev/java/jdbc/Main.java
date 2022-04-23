@@ -12,7 +12,14 @@ public class Main {
     public static void main(String[] args) throws SQLException {
         try (Connection connection = ConexionBaseDatos.getInstance()) {
             Repository<Product> repository = new ProductRepositoryImpl();
+
+            System.out.println("========== FIND ALL ==========");
             repository.findAll().forEach(System.out::println);
+            System.out.println();
+
+            System.out.println("========== FIND BY ID ==========");
+            System.out.println(repository.findById(1L));
+            System.out.println();
         }
     }
 }
