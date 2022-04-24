@@ -21,7 +21,9 @@ public class ProductRepositoryImpl implements Repository<Product> {
         String SQL = "SELECT p.id, p.name, p.price, p.register_date, p.category_id, c.name as category " +
                 "FROM product p " +
                 "INNER JOIN category c ON p.category_id = c.id";
-        try (Statement statement = getConnection().createStatement(); ResultSet resultSet = statement.executeQuery(SQL)) {
+        try (Connection connection = getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(SQL)) {
             while (resultSet.next()) {
                 Product p = getProduct(resultSet);
                 products.add(p);
@@ -32,18 +34,6 @@ public class ProductRepositoryImpl implements Repository<Product> {
         return products;
     }
 
-    private Product getProduct(ResultSet resultSet) throws SQLException {
-        Product p = new Product();
-        p.setId(resultSet.getLong("id"));
-        p.setName(resultSet.getString("name"));
-        p.setPrice(resultSet.getDouble("price"));
-        p.setRegisterDate(resultSet.getDate("register_date"));
-        p.setCategory(new Category());
-        p.getCategory().setId(resultSet.getLong("category_id"));
-        p.getCategory().setName(resultSet.getString("category"));
-        return p;
-    }
-
     @Override
     public Product findById(Long id) {
         Product product = null;
@@ -51,7 +41,8 @@ public class ProductRepositoryImpl implements Repository<Product> {
                 "FROM product p " +
                 "INNER JOIN category c ON p.category_id = c.id " +
                 "WHERE p.id = ?";
-        try (PreparedStatement statement = getConnection().prepareStatement(SQL);) {
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(SQL);) {
             statement.setLong(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -72,7 +63,8 @@ public class ProductRepositoryImpl implements Repository<Product> {
         } else {
             SQL = "INSERT INTO product SET name = ?, price = ?, category_id = ?, register_date = ?";
         }
-        try (PreparedStatement stmt = getConnection().prepareStatement(SQL)) {
+        try (Connection connection = getConnection();
+             PreparedStatement stmt = connection.prepareStatement(SQL)) {
             stmt.setString(1, product.getName());
             stmt.setDouble(2, product.getPrice());
             stmt.setLong(3, product.getCategory().getId());
@@ -91,11 +83,24 @@ public class ProductRepositoryImpl implements Repository<Product> {
     @Override
     public void delete(Long id) {
         String SQL = "DELETE FROM product WHERE id = ?";
-        try (PreparedStatement stmt = getConnection().prepareStatement(SQL)) {
+        try (Connection connection = getConnection();
+             PreparedStatement stmt = connection.prepareStatement(SQL)) {
             stmt.setLong(1, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private Product getProduct(ResultSet resultSet) throws SQLException {
+        Product p = new Product();
+        p.setId(resultSet.getLong("id"));
+        p.setName(resultSet.getString("name"));
+        p.setPrice(resultSet.getDouble("price"));
+        p.setRegisterDate(resultSet.getDate("register_date"));
+        p.setCategory(new Category());
+        p.getCategory().setId(resultSet.getLong("category_id"));
+        p.getCategory().setName(resultSet.getString("category"));
+        return p;
     }
 }
