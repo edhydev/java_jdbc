@@ -12,7 +12,7 @@ import java.util.List;
 public class ProductRepositoryImpl implements Repository<Product> {
 
     private Connection getConnection() throws SQLException {
-        return ConexionBaseDatos.getInstance();
+        return ConexionBaseDatos.getConnection();
     }
 
     @Override
