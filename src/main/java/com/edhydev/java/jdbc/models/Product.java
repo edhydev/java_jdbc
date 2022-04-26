@@ -7,6 +7,7 @@ public class Product {
     private String name;
     private Double price;
     private Date registerDate;
+    private String sku;
     private Category category;
 
     public Product() {
@@ -50,6 +51,14 @@ public class Product {
         this.registerDate = registerDate;
     }
 
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
     public Category getCategory() {
         return category;
     }
@@ -65,6 +74,7 @@ public class Product {
                 ", name='" + name + '\'' +
                 ", price=" + price +
                 ", registerDate=" + registerDate +
+                ", sku='" + sku + '\'' +
                 ", category=" + category +
                 '}';
     }

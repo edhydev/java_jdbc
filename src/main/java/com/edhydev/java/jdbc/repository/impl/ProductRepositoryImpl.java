@@ -18,7 +18,7 @@ public class ProductRepositoryImpl implements Repository<Product> {
     @Override
     public List<Product> findAll() {
         List<Product> products = new ArrayList<>();
-        String SQL = "SELECT p.id, p.name, p.price, p.register_date, p.category_id, c.name as category " +
+        String SQL = "SELECT p.id, p.name, p.price, p.register_date, p.category_id, p.sku, c.name as category " +
                 "FROM product p " +
                 "INNER JOIN category c ON p.category_id = c.id";
         try (Connection connection = getConnection();
@@ -37,7 +37,7 @@ public class ProductRepositoryImpl implements Repository<Product> {
     @Override
     public Product findById(Long id) {
         Product product = null;
-        String SQL = "SELECT p.id, p.name, p.price, p.register_date, p.category_id, c.name as category " +
+        String SQL = "SELECT p.id, p.name, p.price, p.register_date, p.category_id, p.sku, c.name as category " +
                 "FROM product p " +
                 "INNER JOIN category c ON p.category_id = c.id " +
                 "WHERE p.id = ?";
@@ -59,20 +59,21 @@ public class ProductRepositoryImpl implements Repository<Product> {
     public void save(Product product) {
         String SQL;
         if (product.getId() != null && product.getId() > 0) {
-            SQL = "UPDATE product SET name = ?, price = ?, category_id = ? WHERE id = ?";
+            SQL = "UPDATE product SET name = ?, price = ?, category_id = ?, sku = ? WHERE id = ?";
         } else {
-            SQL = "INSERT INTO product SET name = ?, price = ?, category_id = ?, register_date = ?";
+            SQL = "INSERT INTO product SET name = ?, price = ?, category_id = ?, sku = ?, register_date = ?";
         }
         try (Connection connection = getConnection();
              PreparedStatement stmt = connection.prepareStatement(SQL)) {
             stmt.setString(1, product.getName());
             stmt.setDouble(2, product.getPrice());
             stmt.setLong(3, product.getCategory().getId());
+            stmt.setString(4, product.getSku());
 
             if (product.getId() != null && product.getId() > 0) {
-                stmt.setLong(4, product.getId());
+                stmt.setLong(5, product.getId());
             } else {
-                stmt.setDate(4, new Date(product.getRegisterDate().getTime()));
+                stmt.setDate(5, new Date(product.getRegisterDate().getTime()));
             }
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -98,6 +99,7 @@ public class ProductRepositoryImpl implements Repository<Product> {
         p.setName(resultSet.getString("name"));
         p.setPrice(resultSet.getDouble("price"));
         p.setRegisterDate(resultSet.getDate("register_date"));
+        p.setSku(resultSet.getString("sku"));
         p.setCategory(new Category());
         p.getCategory().setId(resultSet.getLong("category_id"));
         p.getCategory().setName(resultSet.getString("category"));
